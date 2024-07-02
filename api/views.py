@@ -11,7 +11,7 @@ def index(request):
 
 def hello(request):
     response = requests.get('https://api64.ipify.org?format=json').json()
-    visitor_name = request.args.get('visitor_name', default='Mark')
+    visitor_name = request.GET.get('visitor_name', 'Mark')
     ip_address = response["ip"]
     location = requests.get(f'https://ipapi.co/{ip_address}/json/').json()
     city = location.get("city")
