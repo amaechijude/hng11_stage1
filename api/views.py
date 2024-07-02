@@ -1,44 +1,37 @@
 from django.shortcuts import render, redirect
 from django.http.response import JsonResponse
 
-import requests, random, socket
+import requests, random, json
 from decouple import config
 
 
-#api_key = config('WEATHER_API')
-#base_url = "http://api.openweathermap.org/data/2.5/weather?"
-
-
-def get_ip():
-    response = requests.get('https://api64.ipify.org?format=json').json()
-    return response["ip"]
-
-
-ip_address = get_ip()
-response = requests.get(f'https://ipapi.co/{ip_address}/json/').json()
-
-name = socket.gethostbyaddr(ip_address)
-print(name)
-
 def index(request):
-    name = ["Mark", "Amaechi", "Jude"]
-    visitor_name = str(random.choice(name))
-    return redirect('hello', visitor_name)
+    return redirect('hello')
 
 
-def hello(request, visitor_name):
+def hello(request):
+    response = requests.get('https://api64.ipify.org?format=json').json()
+    visitor_name = request.args.get('visitor_name', default='Mark')
+    ip_address = response["ip"]
+    location = requests.get(f'https://ipapi.co/{ip_address}/json/').json()
+    city = location.get("city")
 
-    location_data = {
-        "ip": ip_address,
-        "city": response.get("city"),
-        "region": response.get("region"),
-        "country": response.get("country_name"),
-        "name": visitor_name,
-        "nv": name[0]
-    }
-    return JsonResponse(location_data, safe=False)
+    try:
+        api_key = config('api_key')
+        url = f"http://api.openweathermap.org/data/2.5/weather?q={city}&APPID={api_key}"
+        time.sleep(1)
+        resp = requests.get(url).json()
+        temperature = resp.get('main', {}).get('temp')
+        temperature_celsius = round(temperature - 273.15, 2)
+    except:
+        temperature_celsius = "Unknown"
 
-'''api_key = config('WEATHER_API')
-base_url = "http://api.openweathermap.org/data/2.5/weather?"
-city_name = response.get("city")'''
+    output = {
+            "client_ip": ip_address,
+            "location": city,
+            "greeting": f'Hello {visitor_name}, the temperature is {temperature_celsius} degrees celcius in {city}',
+            }
+
+    return JsonResponse(output, safe=False)
+
 
