@@ -5,13 +5,13 @@ import requests, time
 from decouple import config
 
 
-def index(request):
-    return redirect('hello')
+#def index(request):
+#    return redirect('hello')
 
 
 def hello(request):
     response = requests.get('https://api64.ipify.org?format=json').json()
-    visitor_name = request.GET.get('visitor_name', 'Mark')
+    visitor_name = request.GET.get('visitor_name').strip('"')
     ip_address = response["ip"]
     time.sleep(1)
     location = requests.get(f'https://ipapi.co/{ip_address}/json/').json()
