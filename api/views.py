@@ -38,7 +38,7 @@ def hello(request):
                 "greeting": greeting,
             }
 
-    print(ip_address)
+    #print(ip_address)
     
     return JsonResponse(output, safe=False)
     
