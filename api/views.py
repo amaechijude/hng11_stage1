@@ -1,20 +1,26 @@
 from django.shortcuts import render, redirect
 from django.http.response import JsonResponse
 
-import requests, time
+from ipware import get_client_ip
+import requests, time, json
 from decouple import config
 
 
-#def index(request):
-#    return redirect('hello')
+def index(request):
+    time.sleep(1)
+    return redirect('hello')
 
 
 def hello(request):
-    response = requests.get('https://api64.ipify.org?format=json').json()
+    #response = requests.get('https://api64.ipify.org?format=json').json()
     visitor_name = request.GET.get('visitor_name').strip('"')
-    ip_address = response["ip"]
+    
+    #ip_address = response["ip"]
+
+    client_ip, is_routable = get_client_ip(request)
+    
     time.sleep(1)
-    location = requests.get(f'https://ipapi.co/{ip_address}/json/').json()
+    location = requests.get(f'https://ipapi.co/{client_ip}/json/').json()
     city = location.get("city")
 
     api_key = config('api_key')
@@ -27,10 +33,13 @@ def hello(request):
     greeting = f'Hello {visitor_name}, the temperature is {temperature_celsius} degrees celcius in {city}'
 
     output = {
-                "client_ip": ip_address,
+                "client_ip": client_ip,
                 "location": city,
                 "greeting": greeting,
             }
+
+    print(ip_address)
+    
     return JsonResponse(output, safe=False)
     
     #except:
